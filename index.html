@@ -1,0 +1,715 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>AI Automation Agency — Demo</title>
+<style>
+  :root{
+    --navy:#0E1B2B; --navy2:#11314E; --navy3:#16283F;
+    --cream:#F5F0EA; --surface:#FFFFFF; --border:#E2DCCE;
+    --text:#17202B; --muted:#6B7280;
+    --gold:#C98A12; --gold-bg:#E8AA23;
+    --green:#1F8A4C; --green-bg:#E7F5EC;
+    --red:#C23B3B; --red-bg:#FBEAEA;
+    --amber-bg:#FFF4DE;
+    box-sizing:border-box;
+    padding-top:env(safe-area-inset-top,0px);
+    padding-bottom:env(safe-area-inset-bottom,0px);
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --cream:#0E1B2B; --surface:#152439; --border:#233652;
+      --text:#EDEFF3; --muted:#9AA4B2;
+      --green-bg:#133A26; --red-bg:#3A1414; --amber-bg:#2A1E0D;
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"]{
+    --cream:#0E1B2B; --surface:#152439; --border:#233652;
+    --text:#EDEFF3; --muted:#9AA4B2;
+    --green-bg:#133A26; --red-bg:#3A1414; --amber-bg:#2A1E0D;
+    color-scheme: dark;
+  }
+  html{scroll-padding-top:env(safe-area-inset-top,0px);}
+  *{box-sizing:border-box;}
+  body{
+    margin:0; background:var(--cream); color:var(--text);
+    font-family:-apple-system,"Segoe UI",system-ui,"Noto Sans Thai",sans-serif;
+    min-height:100%;
+  }
+  body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:20;background:var(--navy);}
+
+  header.topbar{
+    position:sticky; top:0; z-index:10; background:var(--navy);
+    padding:calc(env(safe-area-inset-top,0px) + 14px) 20px 14px;
+    display:flex; align-items:center; gap:18px; flex-wrap:wrap;
+  }
+  .brand{display:flex; align-items:center; gap:10px; color:#fff; font-weight:700; font-size:1rem; margin-right:auto;}
+  .brand .mark{width:26px; height:26px; display:flex; align-items:center; justify-content:center; color:var(--gold-bg); font-size:1.2rem;}
+  nav.tabs{display:flex; gap:4px; flex-wrap:wrap;}
+  nav.tabs button{
+    appearance:none; border:none; background:transparent; color:#B9C2D1;
+    padding:9px 13px; border-radius:8px; font-size:.86rem; font-weight:600;
+    cursor:pointer; font-family:inherit; white-space:nowrap;
+  }
+  nav.tabs button.active{background:rgba(232,170,35,.14); color:var(--gold-bg);}
+  nav.tabs button:hover{color:#fff;}
+
+  main{max-width:960px; margin:0 auto; padding:26px 20px 64px;}
+  .view{display:none;}
+  .view.active{display:block;}
+
+  .eyebrow{color:var(--gold); font-weight:700; font-size:.78rem; letter-spacing:.03em; margin:0 0 6px;}
+  h1{font-size:1.5rem; margin:0 0 6px;}
+  p.lead{color:var(--muted); margin:0 0 24px; font-size:.95rem; line-height:1.5;}
+
+  .card{background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:18px;}
+  .grid3{display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-bottom:22px;}
+  @media (max-width:700px){.grid3{grid-template-columns:1fr;}}
+  .stat .num{font-size:1.7rem; font-weight:700; color:var(--gold);}
+  .stat .label{font-weight:600; font-size:.88rem; margin-top:2px;}
+  .stat .sub{color:var(--muted); font-size:.8rem; margin-top:4px; line-height:1.4;}
+
+  .feed-item{display:flex; gap:12px; padding:12px 0; border-bottom:1px solid var(--border);}
+  .feed-item:last-child{border-bottom:none;}
+  .feed-icon{width:34px; height:34px; border-radius:9px; background:var(--amber-bg); color:var(--gold); display:flex; align-items:center; justify-content:center; font-size:1rem; flex-shrink:0;}
+  .feed-title{font-weight:600; font-size:.9rem;}
+  .feed-sub{color:var(--muted); font-size:.8rem; margin-top:2px;}
+
+  .section-title{font-weight:700; font-size:1.02rem; margin:0 0 4px;}
+  .section-sub{color:var(--muted); font-size:.85rem; margin:0 0 14px;}
+
+  .connect-row{display:flex; align-items:center; justify-content:space-between; gap:14px; padding:16px 0; border-bottom:1px solid var(--border);}
+  .connect-row:last-child{border-bottom:none;}
+  .connect-name{font-weight:600; font-size:.95rem;}
+  .connect-desc{color:var(--muted); font-size:.82rem; margin-top:3px;}
+  .btn{appearance:none; border:none; border-radius:9px; padding:10px 16px; font-size:.86rem; font-weight:600; cursor:pointer; font-family:inherit;}
+  .btn-gold{background:var(--gold-bg); color:#1A1200;}
+  .btn-outline{background:transparent; border:1px solid var(--border); color:var(--text);}
+  .btn:disabled{opacity:.6; cursor:default;}
+  .status-ok{display:inline-flex; align-items:center; gap:6px; color:var(--green); font-weight:600; font-size:.84rem; background:var(--green-bg); padding:7px 12px; border-radius:999px;}
+
+  .qr-wrap{display:flex; gap:20px; align-items:center; flex-wrap:wrap; margin-top:14px;}
+  .qr{width:132px; height:132px; border-radius:10px; background:#fff; border:1px solid var(--border); display:grid; grid-template-columns:repeat(7,1fr); grid-template-rows:repeat(7,1fr); padding:10px; gap:3px; flex-shrink:0;}
+  .qr div{background:#0E1B2B;}
+  .qr div.off{background:transparent;}
+  .link-box{flex:1; min-width:220px;}
+  .link-input{display:flex; gap:8px;}
+  .link-input input{flex:1; border:1px solid var(--border); border-radius:8px; padding:10px 12px; font-size:.82rem; background:var(--cream); color:var(--text); font-family:inherit;}
+  .copied{font-size:.78rem; color:var(--green); margin-top:6px; min-height:1em;}
+
+  textarea{width:100%; min-height:180px; resize:vertical; background:var(--cream); color:var(--text); border:1px solid var(--border); border-radius:10px; padding:12px; font-size:.9rem; font-family:inherit;}
+  textarea:focus{outline:2px solid var(--gold-bg); outline-offset:1px;}
+  .row{display:flex; gap:10px; flex-wrap:wrap; margin-top:12px; align-items:center;}
+  .ai-status{font-size:.82rem; color:var(--muted); min-height:1.2em;}
+  .result{margin-top:18px;}
+  .result ul{padding-left:1.2em; margin:6px 0; font-size:.9rem; line-height:1.6;}
+  .task-card{border:1px solid var(--border); border-radius:11px; padding:13px 14px; margin-bottom:9px; display:flex; justify-content:space-between; gap:10px; align-items:flex-start; background:var(--surface);}
+  .task-main{font-weight:600; font-size:.9rem;}
+  .task-meta{color:var(--muted); font-size:.8rem; margin-top:4px;}
+  .chip{font-size:.72rem; font-weight:700; padding:3px 9px; border-radius:999px; white-space:nowrap; cursor:pointer; border:none; font-family:inherit;}
+  .chip-pending{background:var(--amber-bg); color:var(--gold);}
+  .chip-progress{background:#E4EEFC; color:#2A5BB0;}
+  .chip-done{background:var(--green-bg); color:var(--green);}
+  .chip-manual{background:var(--red-bg); color:var(--red); cursor:default;}
+  .task-assist-row{margin-top:10px;}
+  .assist-result{margin-top:10px; background:var(--cream); border:1px solid var(--border); border-radius:9px; padding:10px 12px; font-size:.85rem; line-height:1.55; white-space:pre-wrap;}
+
+  .chat-mock{background:var(--cream); border:1px solid var(--border); border-radius:12px; padding:14px; margin-bottom:16px;}
+  .chat-line{font-size:.85rem; margin-bottom:9px; line-height:1.45;}
+  .chat-line b{color:var(--gold);}
+  .badge-live{font-size:.7rem; font-weight:700; color:#fff; background:var(--red); padding:2px 8px; border-radius:999px; margin-left:8px; vertical-align:middle;}
+  .badge-mock{font-size:.7rem; font-weight:700; color:var(--muted); border:1px solid var(--border); padding:2px 8px; border-radius:999px; margin-left:8px; vertical-align:middle;}
+
+  footer{text-align:center; color:var(--muted); font-size:.76rem; margin-top:40px;}
+
+  /* Excel Upload */
+  .upload-zone{border:2px dashed var(--border); border-radius:12px; padding:36px 20px; text-align:center; cursor:pointer; transition:border-color .2s, background .2s; position:relative;}
+  .upload-zone:hover,.upload-zone.drag{border-color:var(--gold-bg); background:var(--amber-bg);}
+  .upload-zone input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;}
+  .upload-icon{font-size:2rem; margin-bottom:8px;}
+  .upload-label{font-weight:600; font-size:.92rem;}
+  .upload-hint{color:var(--muted); font-size:.8rem; margin-top:4px;}
+  .file-chosen{font-size:.82rem; color:var(--green); margin-top:8px; font-weight:600;}
+  .preview-table{width:100%; border-collapse:collapse; font-size:.82rem; margin-top:4px;}
+  .preview-table th{background:var(--cream); color:var(--muted); font-weight:600; padding:7px 10px; text-align:left; border-bottom:1px solid var(--border);}
+  .preview-table td{padding:6px 10px; border-bottom:1px solid var(--border); max-width:160px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+  .preview-table tr:last-child td{border-bottom:none;}
+  .preview-scroll{overflow-x:auto; border-radius:10px; border:1px solid var(--border);}
+
+  /* Save to Drive */
+  .save-bar{display:flex; gap:10px; flex-wrap:wrap; align-items:center; margin-top:14px; padding-top:14px; border-top:1px solid var(--border);}
+  .save-hint{font-size:.8rem; color:var(--muted); margin-top:6px;}
+  .btn-green{background:var(--green); color:#fff;}
+  .roadmap-badge{font-size:.72rem; font-weight:700; background:#E4EEFC; color:#2A5BB0; padding:3px 9px; border-radius:999px; margin-left:6px; vertical-align:middle;}
+
+  /* Drive auto-save flow */
+  .drive-flow{display:flex; flex-wrap:wrap; align-items:center; gap:8px; margin-top:16px; padding:14px; background:var(--cream); border-radius:10px;}
+  .flow-step{font-size:.8rem; font-weight:600; background:#fff; border:1px solid var(--border); border-radius:8px; padding:8px 12px; display:flex; align-items:center; gap:6px;}
+  .flow-num{display:inline-flex; align-items:center; justify-content:center; width:18px; height:18px; border-radius:50%; background:var(--gold-bg); color:#fff; font-size:.7rem; flex-shrink:0;}
+  .flow-arrow{color:var(--muted); font-size:1rem;}
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="brand"><span class="mark">⚡</span> AI Automation Agency</div>
+  <nav class="tabs" id="tabs">
+    <button data-view="dashboard" class="active">Dashboard</button>
+    <button data-view="onboarding">Onboarding</button>
+    <button data-view="meeting">Meeting Summary</button>
+    <button data-view="chat">Chat Summary</button>
+    <button data-view="tasks">Task Tracking</button>
+    <button data-view="excel">Excel Import</button>
+  </nav>
+</header>
+
+<main>
+
+  <!-- DASHBOARD -->
+  <section class="view active" id="view-dashboard">
+    <p class="eyebrow">DASHBOARD</p>
+    <h1>สวัสดี, Siam Export Co., Ltd.</h1>
+    <p class="lead">ภาพรวมงานของทีมคุณในเดือนนี้ — สรุปจาก Agent 1 (Meeting), Agent 2 (LINE Chat) และ Agent 3 (Task Tracking)</p>
+
+    <div class="grid3">
+      <div class="card stat"><div class="num">12</div><div class="label">Meeting สรุปแล้ว</div><div class="sub">ประหยัดเวลาไปแล้ว ~36 ชม.</div></div>
+      <div class="card stat"><div class="num">3</div><div class="label">กลุ่ม LINE ที่เชื่อมอยู่</div><div class="sub">ทีมขาย · ทีมผลิต · ผู้บริหาร</div></div>
+      <div class="card stat"><div class="num">7</div><div class="label">Task ที่ยังไม่เสร็จ</div><div class="sub">2 รายการใกล้ครบกำหนด</div></div>
+    </div>
+
+    <div class="card">
+      <p class="section-title">กิจกรรมล่าสุด</p>
+      <div class="feed-item">
+        <div class="feed-icon">📋</div>
+        <div><div class="feed-title">สรุปประชุม "แผนส่งออก Q1" เสร็จแล้ว</div><div class="feed-sub">Agent 1 · ดึง Action Items ได้ 4 รายการ · 2 ชม.ที่แล้ว</div></div>
+      </div>
+      <div class="feed-item">
+        <div class="feed-icon">💬</div>
+        <div><div class="feed-title">สรุปแชทกลุ่ม "ทีมขาย" รอบเช้า</div><div class="feed-sub">Agent 2 · ลูกค้าตกลงสั่งซื้อ 2 รายการ · 5 ชม.ที่แล้ว</div></div>
+      </div>
+      <div class="feed-item">
+        <div class="feed-icon">✅</div>
+        <div><div class="feed-title">เตือนงาน "ส่งใบเสนอราคา" ใกล้ครบกำหนด</div><div class="feed-sub">Agent 3 · ส่งแจ้งเตือนไปที่คุณมานี — เมื่อวาน</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ONBOARDING -->
+  <section class="view" id="view-onboarding">
+    <p class="eyebrow">ONBOARDING</p>
+    <h1>เชื่อมต่อระบบของคุณ</h1>
+    <p class="lead">ตั้งค่าครั้งเดียวตอนเริ่มใช้งาน — ทีมงานของเราช่วยตั้งค่าส่วนนี้ให้ในวัน onboarding</p>
+
+    <div class="card" style="margin-bottom:16px;">
+      <p class="section-title">Microsoft 365 / Teams</p>
+      <p class="section-sub">สำหรับดึง meeting transcript อัตโนมัติ (Agent 1)</p>
+      <div class="connect-row">
+        <div>
+          <div class="connect-name">บัญชีองค์กร Microsoft 365</div>
+          <div class="connect-desc">ขอสิทธิ์เฉพาะ meeting transcript เท่านั้น</div>
+        </div>
+        <span id="ms-status" class="status-ok">✓ เชื่อมต่อแล้ว</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <p class="section-title">กลุ่ม LINE (Agent 2)</p>
+      <p class="section-sub">ทีมงานสร้างกลุ่มนี้และเชิญ OA เข้าไว้แล้วตั้งแต่วัน onboarding — ทีมของคุณกดลิงก์เพื่อเข้าร่วมได้เลย</p>
+      <div class="qr-wrap">
+        <div class="qr" id="qr"></div>
+        <div class="link-box">
+          <div class="link-input">
+            <input readonly value="https://line.me/ti/g/siam-export-demo" id="line-link">
+            <button class="btn btn-outline" id="copy-link">คัดลอก</button>
+          </div>
+          <div class="copied" id="copied-msg"></div>
+          <div style="margin-top:10px;" class="status-ok">✓ bot (Agent 2) อยู่ในกลุ่มแล้ว</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:16px;">
+      <p class="section-title">Google Drive — บันทึกไฟล์อัตโนมัติ <span class="roadmap-badge">Roadmap</span></p>
+      <p class="section-sub">ไฟล์/เอกสารที่ลูกค้าส่งมาในกลุ่ม LINE และสรุปที่ AI วิเคราะห์แล้ว จะถูกบันทึกเข้า Google Drive อัตโนมัติทันที — ไม่หมดอายุ ค้นหาง่าย ไม่ต้องโหลดเก็บเอง</p>
+      <div class="connect-row">
+        <div>
+          <div class="connect-name">บัญชี Google Drive ของทีม</div>
+          <div class="connect-desc">ขอสิทธิ์เฉพาะ folder ที่กำหนดไว้สำหรับลูกค้ารายนี้</div>
+        </div>
+        <span class="status-ok" style="background:#E4EEFC; color:#2A5BB0;">○ รอเชื่อมต่อ</span>
+      </div>
+      <div class="drive-flow">
+        <div class="flow-step"><span class="flow-num">1</span> ลูกค้าส่งไฟล์/ข้อความในกลุ่ม LINE</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-step"><span class="flow-num">2</span> Agent 2 สรุปด้วย AI</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-step"><span class="flow-num">3</span> n8n workflow บันทึกไฟล์ต้นฉบับ + สรุปเข้า Drive</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-step"><span class="flow-num">4</span> จัดเก็บที่ <code>Drive/ลูกค้า/[ชื่อกลุ่ม]/[วันที่]/</code></div>
+      </div>
+      <p class="save-hint">ขั้นตอนนี้ทำงานอัตโนมัติผ่าน n8n + Google Drive API — ตั้งค่า folder structure ให้ตอน onboarding ครั้งเดียว จากนั้นทุกไฟล์เข้าที่เองโดยไม่ต้องกดอะไรเพิ่ม</p>
+    </div>
+  </section>
+
+  <!-- MEETING SUMMARY -->
+  <section class="view" id="view-meeting">
+    <p class="eyebrow">AGENT 1 · MEETING SUMMARY <span class="badge-live">LIVE DEMO</span></p>
+    <h1>สรุปการประชุมด้วย AI</h1>
+    <p class="lead">วางข้อความ transcript จาก Teams แล้วให้ AI สรุปประเด็นหลักและดึง action items ให้อัตโนมัติ</p>
+
+    <div class="card">
+      <label style="font-weight:600; font-size:.88rem; display:block; margin-bottom:8px;">Meeting transcript</label>
+      <textarea id="transcript" placeholder="วาง transcript การประชุมที่นี่ เช่น:
+สมชาย: เราต้องส่งใบเสนอราคาให้ลูกค้าเวียดนามภายในวันศุกร์นี้
+มานี: รับเรื่องค่ะ จะร่างให้พรุ่งนี้เช้า
+สมชาย: อีกเรื่องคือ container รอบหน้าต้อง confirm กับ shipping ภายในพุธนี้ — ใครรับผิดชอบ
+วิชัย: ผมรับเองครับ"></textarea>
+      <div class="row">
+        <button class="btn btn-gold" id="summarize-btn">สรุปด้วย AI</button>
+        <button class="btn btn-outline" id="sample-btn">ใส่ตัวอย่าง</button>
+        <span class="ai-status" id="ai-status"></span>
+      </div>
+      <div class="result" id="meeting-result"></div>
+    </div>
+  </section>
+
+  <!-- CHAT SUMMARY -->
+  <section class="view" id="view-chat">
+    <p class="eyebrow">AGENT 2 · CHAT SUMMARY <span class="badge-mock">ตัวอย่างข้อมูลจำลอง</span></p>
+    <h1>สรุปแชทกลุ่ม LINE</h1>
+    <p class="lead">กลุ่ม "ทีมขาย — Siam Export" · bot สรุป real-time ให้อัตโนมัติทุกครั้งที่สั่ง "chat"</p>
+
+    <div class="chat-mock">
+      <div class="chat-line"><b>คุณลูกค้า (ABC Trading):</b> รบกวนขอราคาพาเลทไม้ 500 ชิ้นค่ะ ส่งภายในเดือนนี้ได้ไหม</div>
+      <div class="chat-line"><b>มานี (ฝ่ายขาย):</b> ได้ค่ะ ราคาชิ้นละ 180 บาท ส่งได้ภายในวันที่ 15</div>
+      <div class="chat-line"><b>คุณลูกค้า (ABC Trading):</b> ตกลงค่ะ เอา 500 ชิ้นเลย โอนมัดจำวันนี้</div>
+      <div class="chat-line"><b>วิชัย (โลจิสติกส์):</b> รับทราบครับ จะเตรียม container ให้</div>
+    </div>
+
+    <div class="card" id="chat-summary-card">
+      <p class="section-title">สรุปโดย Agent 2</p>
+      <ul id="chat-summary-list">
+        <li>ลูกค้า ABC Trading สั่งซื้อพาเลทไม้ 500 ชิ้น ราคาชิ้นละ 180 บาท (รวม 90,000 บาท)</li>
+        <li>กำหนดส่งภายในวันที่ 15 เดือนนี้ — ลูกค้าโอนมัดจำแล้ว</li>
+        <li>ฝ่ายโลจิสติกส์ (วิชัย) รับผิดชอบเตรียม container</li>
+      </ul>
+      <div class="save-bar">
+        <button class="btn btn-green" id="save-txt-btn">⬇ ดาวน์โหลดสรุป (.txt)</button>
+        <span>
+          <button class="btn btn-outline" id="save-drive-btn">☁ บันทึกใน Google Drive <span class="roadmap-badge">Roadmap</span></button>
+        </span>
+      </div>
+      <p class="save-hint">ไฟล์สรุปแชทจะถูกบันทึกอัตโนมัติเข้า Google Drive (ตั้งค่าได้ใน Onboarding) — ปัจจุบันดาวน์โหลดเป็นไฟล์ได้เลย</p>
+      <p id="save-status" class="save-hint" style="color:var(--green); min-height:1em;"></p>
+    </div>
+  </section>
+
+  <!-- TASK TRACKING -->
+  <section class="view" id="view-tasks">
+    <p class="eyebrow">AGENT 3 · TASK TRACKING <span class="badge-mock">ตัวอย่างข้อมูลจำลอง</span></p>
+    <h1>ติดตามงาน</h1>
+    <p class="lead">งานที่ดึงมาจากสรุป Agent 1 และ Agent 2 โดยอัตโนมัติ — กดที่สถานะเพื่อเปลี่ยน · กด "ให้ AI ช่วย" เพื่อให้ Agent 3 ร่างเอกสารหรือช่วยหาข้อมูลให้ (เรียก AI จริง) ส่วนงานเจรจา/หน้างานจริง AI ทำแทนไม่ได้ ทำได้แค่เตือนและติดตามเท่านั้น</p>
+    <div id="task-list"></div>
+  </section>
+
+  <!-- EXCEL IMPORT -->
+  <section class="view" id="view-excel">
+    <p class="eyebrow">AGENT 2 · EXCEL IMPORT <span class="badge-live">LIVE DEMO</span></p>
+    <h1>อ่านข้อมูลจาก Excel</h1>
+    <p class="lead">อัปโหลดไฟล์ Excel (.xlsx / .xls / .csv) ที่บันทึกรายรับ-รายจ่าย หรือข้อมูลลูกค้า — AI จะสรุปประเด็นสำคัญให้ทันที ไม่ต้องเชื่อมต่อ OneDrive</p>
+
+    <div class="card" style="margin-bottom:16px;">
+      <p class="section-title">1. เลือกไฟล์</p>
+      <div class="upload-zone" id="upload-zone">
+        <input type="file" id="excel-file" accept=".xlsx,.xls,.csv">
+        <div class="upload-icon">📊</div>
+        <div class="upload-label">กดเพื่อเลือกไฟล์ หรือลากมาวางที่นี่</div>
+        <div class="upload-hint">รองรับ .xlsx, .xls, .csv · ขนาดไม่เกิน 5 MB</div>
+        <div class="file-chosen" id="file-chosen"></div>
+      </div>
+    </div>
+
+    <div class="card" id="excel-preview-card" style="display:none; margin-bottom:16px;">
+      <p class="section-title">2. ตัวอย่างข้อมูล (10 แถวแรก)</p>
+      <div class="preview-scroll" id="excel-preview"></div>
+      <div class="row" style="margin-top:14px;">
+        <button class="btn btn-gold" id="excel-analyze-btn">วิเคราะห์ด้วย AI</button>
+        <span class="ai-status" id="excel-ai-status"></span>
+      </div>
+    </div>
+
+    <div class="card" id="excel-result-card" style="display:none;">
+      <p class="section-title">3. ผลการวิเคราะห์โดย AI</p>
+      <div id="excel-result"></div>
+      <div class="save-bar" style="margin-top:14px;">
+        <button class="btn btn-green" id="excel-save-btn">⬇ ดาวน์โหลดผลวิเคราะห์ (.txt)</button>
+        <button class="btn btn-outline" id="excel-drive-btn">☁ บันทึกใน Google Drive <span class="roadmap-badge">Roadmap</span></button>
+      </div>
+      <p id="excel-save-status" class="save-hint" style="color:var(--green); min-height:1em;"></p>
+    </div>
+  </section>
+
+</main>
+
+<footer>AI Automation Agency · USC10967 · Track 2 — เดโมนี้ใช้ข้อมูลจำลอง ยกเว้นหน้า Meeting Summary ที่เรียก AI จริง</footer>
+
+<script>
+  // ---- Nav ----
+  const tabs = document.getElementById('tabs');
+  function showView(name){
+    document.querySelectorAll('.view').forEach(v => v.classList.toggle('active', v.id === 'view-' + name));
+    document.querySelectorAll('#tabs button').forEach(b => b.classList.toggle('active', b.dataset.view === name));
+    location.hash = name;
+  }
+  tabs.addEventListener('click', e => {
+    const btn = e.target.closest('button[data-view]');
+    if (btn) showView(btn.dataset.view);
+  });
+  const startView = (location.hash || '#dashboard').slice(1);
+  showView(['dashboard','onboarding','meeting','chat','tasks','excel'].includes(startView) ? startView : 'dashboard');
+
+  // ---- QR mock (visual only) ----
+  (function(){
+    const qr = document.getElementById('qr');
+    const pattern = [1,1,1,0,1,0,1, 1,0,1,0,0,1,1, 1,1,1,0,1,1,0, 0,0,0,1,0,1,0, 1,1,0,1,1,0,1, 0,1,0,0,1,1,1, 1,0,1,1,0,1,1];
+    pattern.forEach(v => {
+      const d = document.createElement('div');
+      if (!v) d.className = 'off';
+      qr.appendChild(d);
+    });
+  })();
+
+  // ---- Copy link ----
+  document.getElementById('copy-link').addEventListener('click', async () => {
+    const input = document.getElementById('line-link');
+    try {
+      await navigator.clipboard.writeText(input.value);
+      document.getElementById('copied-msg').textContent = 'คัดลอกลิงก์แล้ว';
+    } catch(e) {
+      input.select();
+      document.getElementById('copied-msg').textContent = 'เลือกข้อความแล้วกด Ctrl/Cmd+C';
+    }
+    setTimeout(() => document.getElementById('copied-msg').textContent = '', 2500);
+  });
+
+  // ---- Sample transcript ----
+  const SAMPLE = `สมชาย: เราต้องส่งใบเสนอราคาให้ลูกค้าเวียดนามภายในวันศุกร์นี้
+มานี: รับเรื่องค่ะ จะร่างให้พรุ่งนี้เช้า
+สมชาย: อีกเรื่องคือ container รอบหน้าต้อง confirm กับ shipping ภายในพุธนี้ — ใครรับผิดชอบ
+วิชัย: ผมรับเองครับ
+สมชาย: สุดท้ายเรื่องคลังสินค้า เดือนหน้าของจะล้นคลัง ต้องหาพื้นที่เสริมภายในสัปดาห์นี้
+มานี: ฝ่ายฉันจะลองติดต่อโกดังแถวบางนาดูค่ะ`;
+  document.getElementById('sample-btn').addEventListener('click', () => {
+    document.getElementById('transcript').value = SAMPLE;
+  });
+
+  // ---- Meeting summary (live AI call via sample capability) ----
+  let sample = null;
+  (async () => {
+    try { sample = await claude.use('sample'); } catch(e) { sample = null; }
+  })();
+
+  document.getElementById('summarize-btn').addEventListener('click', async () => {
+    const text = document.getElementById('transcript').value.trim();
+    const statusEl = document.getElementById('ai-status');
+    const resultEl = document.getElementById('meeting-result');
+    const btn = document.getElementById('summarize-btn');
+    if (!text) { statusEl.textContent = 'กรุณาวาง transcript ก่อน'; return; }
+    if (!sample) {
+      try { sample = await claude.use('sample'); } catch(e) {}
+    }
+    if (!sample) {
+      statusEl.textContent = 'AI demo ใช้ได้เฉพาะเมื่อเปิดผ่าน claude.ai';
+      return;
+    }
+    btn.disabled = true;
+    statusEl.textContent = 'กำลังสรุป...';
+    resultEl.innerHTML = '';
+    try {
+      const prompt = `คุณคือ Agent 1 (Meeting Summary) ของระบบ AI Automation Agency สำหรับ SME ไทย
+สรุปประเด็นหลักจาก meeting transcript ต่อไปนี้เป็นภาษาไทย 3-5 ข้อ และดึง action items พร้อมผู้รับผิดชอบ (ถ้าระบุ) และกำหนดเวลา (ถ้าระบุ)
+ตอบเป็น JSON เท่านั้น ไม่ต้องมีข้อความอื่น ในรูปแบบ:
+{"summary": ["ข้อ1","ข้อ2"], "action_items": [{"task":"...","owner":"...","due":"..."}]}
+
+Transcript:
+${text}`;
+      const data = await sample.json(prompt, { modelTier: 'quick' });
+      let html = '<p class="section-title" style="margin-top:4px;">สรุปประเด็นหลัก</p><ul>';
+      (data.summary || []).forEach(s => html += `<li>${escapeHtml(s)}</li>`);
+      html += '</ul>';
+      if (data.action_items && data.action_items.length) {
+        html += '<p class="section-title" style="margin-top:14px;">Action Items</p>';
+        data.action_items.forEach(it => {
+          html += `<div class="task-card"><div><div class="task-main">${escapeHtml(it.task||'')}</div>
+          <div class="task-meta">${escapeHtml(it.owner||'ยังไม่ระบุผู้รับผิดชอบ')}${it.due ? ' · กำหนด ' + escapeHtml(it.due) : ''}</div></div></div>`;
+        });
+      }
+      resultEl.innerHTML = html;
+      statusEl.textContent = 'สรุปเสร็จแล้ว';
+    } catch(err) {
+      statusEl.textContent = 'สรุปไม่สำเร็จ ลองใหม่อีกครั้ง';
+    } finally {
+      btn.disabled = false;
+    }
+  });
+
+  function escapeHtml(s){
+    return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  }
+
+  // ---- Task tracking mock ----
+  const TASKS = [
+    { task: 'ร่างใบเสนอราคาให้ลูกค้าเวียดนาม', owner: 'มานี', due: 'ศุกร์นี้', status: 'progress', assist: 'draft' },
+    { task: 'Confirm container กับ shipping', owner: 'วิชัย', due: 'พุธนี้', status: 'pending', assist: 'manual' },
+    { task: 'หาพื้นที่คลังสินค้าเสริม', owner: 'มานี', due: 'สัปดาห์นี้', status: 'pending', assist: 'research' },
+    { task: 'เตรียม container ให้ ABC Trading', owner: 'วิชัย', due: '15 เดือนนี้', status: 'progress', assist: 'manual' },
+    { task: 'ส่งใบเสนอราคารอบก่อนหน้า', owner: 'สมชาย', due: 'ผ่านมาแล้ว', status: 'done', assist: 'draft' },
+  ];
+  const STATUS_CYCLE = { pending: 'progress', progress: 'done', done: 'pending' };
+  const STATUS_LABEL = { pending: 'รอดำเนินการ', progress: 'กำลังทำ', done: 'เสร็จแล้ว' };
+  const STATUS_CLASS = { pending: 'chip-pending', progress: 'chip-progress', done: 'chip-done' };
+  const ASSIST_STATE = {};
+
+  function renderTasks(){
+    const el = document.getElementById('task-list');
+    el.innerHTML = TASKS.map((t, i) => {
+      const st = ASSIST_STATE[i] || {};
+      let assistRow;
+      if (t.assist === 'manual') {
+        assistRow = `<div class="task-assist-row"><span class="chip chip-manual">ทำแทนไม่ได้ — เตือนและติดตามเท่านั้น</span></div>`;
+      } else {
+        const label = st.loading ? 'กำลังทำงาน...' : (t.assist === 'draft' ? '✎ ให้ AI ร่างให้' : '🔎 ให้ AI ช่วยหาข้อมูล');
+        assistRow = `<div class="task-assist-row"><button class="btn btn-outline" data-assist-i="${i}" style="font-size:.78rem; padding:7px 12px;" ${st.loading ? 'disabled' : ''}>${label}</button></div>`;
+      }
+      const resultHtml = st.result ? `<div class="assist-result">${st.result}</div>` : '';
+      return `
+      <div class="task-card" style="flex-direction:column; align-items:stretch;">
+        <div style="display:flex; justify-content:space-between; gap:10px; align-items:flex-start;">
+          <div>
+            <div class="task-main">${escapeHtml(t.task)}</div>
+            <div class="task-meta">${escapeHtml(t.owner)} · กำหนด ${escapeHtml(t.due)}</div>
+          </div>
+          <button class="chip ${STATUS_CLASS[t.status]}" data-status-i="${i}">${STATUS_LABEL[t.status]}</button>
+        </div>
+        ${assistRow}
+        ${resultHtml}
+      </div>`;
+    }).join('');
+    el.querySelectorAll('button[data-status-i]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const i = +btn.dataset.statusI;
+        TASKS[i].status = STATUS_CYCLE[TASKS[i].status];
+        renderTasks();
+      });
+    });
+    el.querySelectorAll('button[data-assist-i]').forEach(btn => {
+      btn.addEventListener('click', () => handleAssist(+btn.dataset.assistI));
+    });
+  }
+
+  async function handleAssist(i){
+    const t = TASKS[i];
+    if (!sample) { try { sample = await claude.use('sample'); } catch(e) {} }
+    if (!sample) { ASSIST_STATE[i] = { result: 'AI demo ใช้ได้เฉพาะเมื่อเปิดผ่าน claude.ai' }; renderTasks(); return; }
+    ASSIST_STATE[i] = { loading: true };
+    renderTasks();
+    try {
+      const prompt = t.assist === 'draft'
+        ? `คุณคือ Agent 3 (Task Tracking · Assist) ของ AI Automation Agency ช่วยร่างข้อความ/เอกสารสั้นๆ ที่ใช้ได้จริงสำหรับงานนี้เป็นภาษาไทย ไม่เกิน 120 คำ ตอบเป็นร่างเลย ไม่ต้องอธิบายเพิ่ม: "${t.task}" (ผู้รับผิดชอบ: ${t.owner}, กำหนด: ${t.due})`
+        : `คุณคือ Agent 3 (Task Tracking · Assist) ของ AI Automation Agency ช่วยสรุป checklist สั้นๆ ว่าควรหาข้อมูลอะไรบ้างและจากแหล่งไหนสำหรับงานนี้ เป็นภาษาไทย ไม่เกิน 120 คำ ตอบเป็น bullet: "${t.task}" (หมายเหตุ: เดโมนี้ยังไม่ได้เชื่อมต่อ web search จริง เป็นการประเมินเบื้องต้นจาก AI เท่านั้น)`;
+      const res = await sample(prompt, { modelTier: 'quick' });
+      ASSIST_STATE[i] = { result: escapeHtml(res.text) };
+    } catch (err) {
+      ASSIST_STATE[i] = { result: 'ทำงานไม่สำเร็จ ลองใหม่อีกครั้ง' };
+    }
+    renderTasks();
+  }
+
+  renderTasks();
+
+  // ---- Save Chat Summary as .txt ----
+  document.getElementById('save-txt-btn').addEventListener('click', () => {
+    const items = document.querySelectorAll('#chat-summary-list li');
+    const lines = [...items].map((li, i) => `${i+1}. ${li.textContent}`).join('\n');
+    const date = new Date().toLocaleDateString('th-TH');
+    const content = `สรุปแชทกลุ่ม LINE — ทีมขาย Siam Export\nวันที่: ${date}\n\n${lines}\n\nสรุปโดย Agent 2 (AI Automation Agency)`;
+    const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = `chat-summary-${Date.now()}.txt`;
+    a.click();
+    document.getElementById('save-status').textContent = '✓ ดาวน์โหลดเสร็จแล้ว';
+    setTimeout(() => document.getElementById('save-status').textContent = '', 3000);
+  });
+  document.getElementById('save-drive-btn').addEventListener('click', () => {
+    document.getElementById('save-status').textContent = '☁ Google Drive อยู่ใน Roadmap — ตั้งค่าได้ใน Onboarding เมื่อเชื่อมต่อแล้ว';
+    setTimeout(() => document.getElementById('save-status').textContent = '', 4000);
+  });
+
+  // ---- Excel Import ----
+  // Load SheetJS from CDN
+  const sheetScript = document.createElement('script');
+  sheetScript.src = 'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';
+  document.head.appendChild(sheetScript);
+
+  let excelData = null; // { headers, rows (all), preview (first 10) }
+
+  const uploadZone = document.getElementById('upload-zone');
+  const fileInput = document.getElementById('excel-file');
+
+  uploadZone.addEventListener('dragover', e => { e.preventDefault(); uploadZone.classList.add('drag'); });
+  uploadZone.addEventListener('dragleave', () => uploadZone.classList.remove('drag'));
+  uploadZone.addEventListener('drop', e => {
+    e.preventDefault(); uploadZone.classList.remove('drag');
+    const f = e.dataTransfer.files[0];
+    if (f) handleExcelFile(f);
+  });
+  fileInput.addEventListener('change', () => { if (fileInput.files[0]) handleExcelFile(fileInput.files[0]); });
+
+  function handleExcelFile(file) {
+    document.getElementById('file-chosen').textContent = `✓ ${file.name}`;
+    const reader = new FileReader();
+    reader.onload = e => {
+      try {
+        const XLSX = window.XLSX;
+        if (!XLSX) { alert('กำลังโหลด library กรุณาลองใหม่อีกครั้ง'); return; }
+        let wb;
+        if (file.name.endsWith('.csv')) {
+          const text = new TextDecoder('utf-8').decode(e.target.result);
+          wb = XLSX.read(text, { type: 'string' });
+        } else {
+          wb = XLSX.read(new Uint8Array(e.target.result), { type: 'array' });
+        }
+        const ws = wb.Sheets[wb.SheetNames[0]];
+        const rows = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '' });
+        if (!rows.length) { alert('ไม่พบข้อมูลในไฟล์'); return; }
+        const headers = rows[0];
+        const data = rows.slice(1).filter(r => r.some(c => c !== ''));
+        excelData = { headers, rows: data, fileName: file.name };
+        renderExcelPreview(headers, data.slice(0, 10));
+      } catch(err) {
+        alert('อ่านไฟล์ไม่ได้: ' + err.message);
+      }
+    };
+    if (file.name.endsWith('.csv')) reader.readAsArrayBuffer(file);
+    else reader.readAsArrayBuffer(file);
+  }
+
+  function renderExcelPreview(headers, rows) {
+    const previewCard = document.getElementById('excel-preview-card');
+    const previewEl = document.getElementById('excel-preview');
+    let html = '<table class="preview-table"><thead><tr>';
+    headers.forEach(h => html += `<th>${escapeHtml(String(h))}</th>`);
+    html += '</tr></thead><tbody>';
+    rows.forEach(row => {
+      html += '<tr>';
+      headers.forEach((_, i) => html += `<td title="${escapeHtml(String(row[i]||''))}">${escapeHtml(String(row[i]||''))}</td>`);
+      html += '</tr>';
+    });
+    html += '</tbody></table>';
+    previewEl.innerHTML = html;
+    previewCard.style.display = 'block';
+    document.getElementById('excel-result-card').style.display = 'none';
+  }
+
+  document.getElementById('excel-analyze-btn').addEventListener('click', async () => {
+    if (!excelData) return;
+    const statusEl = document.getElementById('excel-ai-status');
+    const resultCard = document.getElementById('excel-result-card');
+    const resultEl = document.getElementById('excel-result');
+    const btn = document.getElementById('excel-analyze-btn');
+
+    if (!sample) { try { sample = await claude.use('sample'); } catch(e) {} }
+    if (!sample) {
+      statusEl.textContent = 'AI demo ใช้ได้เฉพาะเมื่อเปิดผ่าน claude.ai';
+      return;
+    }
+
+    btn.disabled = true;
+    statusEl.textContent = 'กำลังวิเคราะห์...';
+    resultCard.style.display = 'none';
+
+    try {
+      // Build compact CSV string (max 200 rows to stay within token limits)
+      const maxRows = Math.min(excelData.rows.length, 200);
+      const csvLines = [excelData.headers.join(',')];
+      for (let i = 0; i < maxRows; i++) {
+        csvLines.push(excelData.headers.map((_, j) => `"${String(excelData.rows[i][j]||'').replace(/"/g,'""')}"`).join(','));
+      }
+      const csvSnippet = csvLines.join('\n');
+
+      const prompt = `คุณคือ Agent 2 (Excel Analyst) ของ AI Automation Agency สำหรับ SME ไทย
+วิเคราะห์ข้อมูลจาก Excel ไฟล์ "${excelData.fileName}" (${excelData.rows.length} แถว) ต่อไปนี้:
+
+${csvSnippet}
+
+สรุปประเด็นสำคัญเป็นภาษาไทย ครอบคลุม:
+1. ภาพรวมข้อมูล (จำนวนแถว, คอลัมน์, ช่วงวันที่ถ้ามี)
+2. ยอดรวมหรือตัวเลขสำคัญ (ถ้าเป็นข้อมูลทางการเงิน)
+3. รายการที่น่าสังเกตหรือความผิดปกติ
+4. Action Items ที่แนะนำ
+
+ตอบเป็น JSON เท่านั้น:
+{"overview":"...","highlights":["...","..."],"action_items":[{"task":"...","priority":"สูง|กลาง|ต่ำ"}]}`;
+
+      const data = await sample.json(prompt, { modelTier: 'quick' });
+      let html = `<p style="color:var(--muted); font-size:.82rem; margin-bottom:12px;">ไฟล์: ${escapeHtml(excelData.fileName)} · ${excelData.rows.length} แถว · ${excelData.headers.length} คอลัมน์</p>`;
+      if (data.overview) html += `<p style="font-size:.9rem; line-height:1.6; margin-bottom:14px;">${escapeHtml(data.overview)}</p>`;
+      if (data.highlights && data.highlights.length) {
+        html += '<p class="section-title">ประเด็นสำคัญ</p><ul class="result" style="margin-top:0;">';
+        data.highlights.forEach(h => html += `<li>${escapeHtml(h)}</li>`);
+        html += '</ul>';
+      }
+      if (data.action_items && data.action_items.length) {
+        html += '<p class="section-title" style="margin-top:14px;">Action Items</p>';
+        data.action_items.forEach(it => {
+          const cls = it.priority === 'สูง' ? 'chip-pending' : it.priority === 'กลาง' ? 'chip-progress' : 'chip-done';
+          html += `<div class="task-card"><div><div class="task-main">${escapeHtml(it.task||'')}</div></div><span class="chip ${cls}">${escapeHtml(it.priority||'')}</span></div>`;
+        });
+      }
+      resultEl.innerHTML = html;
+      resultCard.style.display = 'block';
+      statusEl.textContent = 'วิเคราะห์เสร็จแล้ว';
+
+      // Store result text for download
+      resultCard._summaryText = [
+        `วิเคราะห์ Excel: ${excelData.fileName}`,
+        `วันที่: ${new Date().toLocaleDateString('th-TH')}`,
+        '',
+        data.overview || '',
+        '',
+        'ประเด็นสำคัญ:',
+        ...(data.highlights || []).map((h, i) => `${i+1}. ${h}`),
+        '',
+        'Action Items:',
+        ...(data.action_items || []).map(it => `- [${it.priority}] ${it.task}`),
+        '',
+        'สรุปโดย Agent 2 (AI Automation Agency)'
+      ].join('\n');
+    } catch(err) {
+      statusEl.textContent = 'วิเคราะห์ไม่สำเร็จ ลองใหม่อีกครั้ง';
+    } finally {
+      btn.disabled = false;
+    }
+  });
+
+  document.getElementById('excel-save-btn').addEventListener('click', () => {
+    const card = document.getElementById('excel-result-card');
+    const text = card._summaryText || 'ยังไม่มีผลวิเคราะห์';
+    const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = `excel-analysis-${Date.now()}.txt`;
+    a.click();
+    document.getElementById('excel-save-status').textContent = '✓ ดาวน์โหลดเสร็จแล้ว';
+    setTimeout(() => document.getElementById('excel-save-status').textContent = '', 3000);
+  });
+  document.getElementById('excel-drive-btn').addEventListener('click', () => {
+    document.getElementById('excel-save-status').textContent = '☁ Google Drive อยู่ใน Roadmap — จะเชื่อมต่ออัตโนมัติหลัง Onboarding';
+    setTimeout(() => document.getElementById('excel-save-status').textContent = '', 4000);
+  });
+</script>
+</body>
+</html>
